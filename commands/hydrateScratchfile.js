@@ -133,7 +133,7 @@ const forceUtils = require('../lib/forceUtils.js');
                 'IsRecurringEventsEnabled': 'enableRecurringEvents',
                 'IsRecurringTasksEnabled': 'enableRecurringTasks',
                 'IsSidebarCalendarShortcutEnabled': 'enableSidebarCalendarShortcut',
-                'IsSimpleTaskCreateUiEnabled': 'enableSimpleTaskCreateUI',
+                'IsSimpleTaskCreateUIEnabled': 'enableSimpleTaskCreateUI',
                 'ShowEventDetailsMultiUserCalendar': 'showEventDetailsMultiUserCalendar',
                 'ShowHomePageHoverLinksForEvents': 'showHomePageHoverLinksForEvents',
                 'ShowMyTasksHoverLinks': 'showMyTasksHoverLinks'
