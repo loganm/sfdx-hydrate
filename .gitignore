@@ -1,0 +1,36 @@
+/.bundle/
+/.yardoc
+/Gemfile.lock
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+
+
+#OSX-specific exclusions
+.[dD][sS]_[sS]tore
+
+#Sublime nature exclusions
+*.sublime-workspace
+*.sublime-project
+*.sublime-settings
+/config/
+/debug/
+
+#Visual Studio Code nature exclusions
+.vscode/
+
+#Misc exclusions
+*.sh
+*.iml
+*.orig
+.idea/
+.sublime-grunt.cache
+.apex-scripts
+.apex
+node_modules/
+mm.log
+bin
+
