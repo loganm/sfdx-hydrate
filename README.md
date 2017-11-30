@@ -1,6 +1,6 @@
 # sfdx-hydrate
 
-This is a plugin to help create new SFDX projects from existing Salesforce orgs. The ultimately goal is to run an `sfdx hydrate:project` command, and produce an SFDX project from an existing orgs metadata.
+This is a plugin to help create new SFDX projects from existing Salesforce orgs. The ultimate goal is to run an `sfdx hydrate:project` command, and produce an SFDX project from an existing orgs metadata.
 
 ## Creating a scratch file from a source org
 

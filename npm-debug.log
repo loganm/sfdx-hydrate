@@ -1,0 +1,124 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/Users/logan/.asdf/installs/nodejs/6.11.4/bin/node',
+1 verbose cli   '/Users/logan/.asdf/installs/nodejs/6.11.4/bin/npm',
+1 verbose cli   'publish' ]
+2 info using npm@3.10.10
+3 info using node@v6.11.4
+4 verbose publish [ '.' ]
+5 silly cache add args [ '.', null ]
+6 verbose cache add spec .
+7 silly cache add parsed spec Result {
+7 silly cache add   raw: '.',
+7 silly cache add   scope: null,
+7 silly cache add   escapedName: null,
+7 silly cache add   name: null,
+7 silly cache add   rawSpec: '.',
+7 silly cache add   spec: '/Users/logan/Projects/sfdx-hydrate',
+7 silly cache add   type: 'directory' }
+8 verbose addLocalDirectory /Users/logan/.npm/sfdx-hydrate/0.1.0/package.tgz not in flight; packing
+9 verbose correctMkdir /Users/logan/.npm correctMkdir not in flight; initializing
+10 info lifecycle sfdx-hydrate@0.1.0~prepublish: sfdx-hydrate@0.1.0
+11 silly lifecycle sfdx-hydrate@0.1.0~prepublish: no script for prepublish, continuing
+12 verbose tar pack [ '/Users/logan/.npm/sfdx-hydrate/0.1.0/package.tgz',
+12 verbose tar pack   '/Users/logan/Projects/sfdx-hydrate' ]
+13 verbose tarball /Users/logan/.npm/sfdx-hydrate/0.1.0/package.tgz
+14 verbose folder /Users/logan/Projects/sfdx-hydrate
+15 verbose addLocalTarball adding from inside cache /Users/logan/.npm/sfdx-hydrate/0.1.0/package.tgz
+16 verbose correctMkdir /Users/logan/.npm correctMkdir not in flight; initializing
+17 silly cache afterAdd sfdx-hydrate@0.1.0
+18 verbose afterAdd /Users/logan/.npm/sfdx-hydrate/0.1.0/package/package.json not in flight; writing
+19 verbose correctMkdir /Users/logan/.npm correctMkdir not in flight; initializing
+20 verbose afterAdd /Users/logan/.npm/sfdx-hydrate/0.1.0/package/package.json written
+21 silly publish { name: 'sfdx-hydrate',
+21 silly publish   version: '0.1.0',
+21 silly publish   description: 'Tools to help migrate existing Salesforce orgs to SFDX projects.',
+21 silly publish   main: 'index.js',
+21 silly publish   author: { name: 'Logan Moore' },
+21 silly publish   repository:
+21 silly publish    { type: 'git',
+21 silly publish      url: 'git+https://github.com/loganm/sfdx-hydrate.git' },
+21 silly publish   bugs: { url: 'https://github.com/loganm/sfdx-hydrate/issues' },
+21 silly publish   scripts: {},
+21 silly publish   keywords:
+21 silly publish    [ 'apex',
+21 silly publish      'force.com',
+21 silly publish      'rumble',
+21 silly publish      'salesforce',
+21 silly publish      'salesforce-dx',
+21 silly publish      'salesforcedx',
+21 silly publish      'oss' ],
+21 silly publish   license: 'MIT',
+21 silly publish   dependencies:
+21 silly publish    { 'sfdx-js': '^4.0.5',
+21 silly publish      jsforce: '^1.7.1',
+21 silly publish      'salesforce-alm': '^40.0.6' },
+21 silly publish   devDependencies:
+21 silly publish    { eslint: '^3.17.1',
+21 silly publish      'eslint-config-airbnb-base': '^11.1.1',
+21 silly publish      'eslint-plugin-import': '^2.2.0' },
+21 silly publish   readme: '# sfdx-hydrate\n\nThis is a plugin to help create new SFDX projects from existing Salesforce orgs. The ultimately goal is to run an `sfdx hydrate:project` command, and produce an SFDX project from an existing orgs metadata.\n\n## Creating a scratch file from a source org\n\nThe first feature built towards this goal is creating a scratch file. Salesforce is piloting an org shape feature, but I\'m impatient and could get 90% of the way there without it.\n\nThe only missing piece from the resulting scratch org is the features list. I\'m working on it.\n\nRun the command:\n\n```\n$ sfdx hydrate:scratchfile -u <username|alias>`\n```\n\nThis will produce a JSON string in the command line that can be copied to a scratch org file.\n\nexample output:\n\n```\n{\n  "orgName": "Wayne Enterprises",\n  "edition": "Enterprise",\n  "description": "Created by the sfdx-hydrate plugin",\n  "features": [],\n  "orgPreferences": {\n    "enabled": [\n      "IsCascadeActivateToRelatedPricesEnabled",\n      "IsQuantityScheduleEnabled",\n      "IsRevenueScheduleEnabled",\n      "IsQuoteEnabled",\n      ... \n    ],\n    "disabled": [\n      "IsMiddleNameEnabled",\n      "IsNameSuffixEnabled",\n      "IsMarketingActionEnabled",\n      "IsNegativeQuantityEnabled",\n      ...\n    ]\n  }\n}\n```\n\n### Install as plugin\n\n1. Install plugin: `sfdx plugins:install sfdx-hydrate`\n\n### Install from source\n\n1. Install the SDFX CLI.\n\n2. Clone the repository: `git clone git@github.com:loganm/sfdx-hydrate.git`\n\n3. Install npm modules: `npm install`\n\n4. Link the plugin: `sfdx plugins:link .`\n\n## Contributing\n\nBug reports and pull requests are welcome on GitHub at https://github.com/loganm/sfdx-hydrate. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.\n\n\n\n',
+21 silly publish   readmeFilename: 'README.md',
+21 silly publish   gitHead: 'dd78513c0c4fb54ae2831c1f06fe490a163e3440',
+21 silly publish   homepage: 'https://github.com/loganm/sfdx-hydrate#readme',
+21 silly publish   _id: 'sfdx-hydrate@0.1.0',
+21 silly publish   _shasum: '5ae84ad50b7c788c1f6e38bcbf7fc6a857cf729f',
+21 silly publish   _from: '.' }
+22 verbose getPublishConfig undefined
+23 silly mapToRegistry name sfdx-hydrate
+24 silly mapToRegistry using default registry
+25 silly mapToRegistry registry https://registry.npmjs.org/
+26 silly mapToRegistry data Result {
+26 silly mapToRegistry   raw: 'sfdx-hydrate',
+26 silly mapToRegistry   scope: null,
+26 silly mapToRegistry   escapedName: 'sfdx-hydrate',
+26 silly mapToRegistry   name: 'sfdx-hydrate',
+26 silly mapToRegistry   rawSpec: '',
+26 silly mapToRegistry   spec: 'latest',
+26 silly mapToRegistry   type: 'tag' }
+27 silly mapToRegistry uri https://registry.npmjs.org/sfdx-hydrate
+28 verbose publish registryBase https://registry.npmjs.org/
+29 silly publish uploading /Users/logan/.npm/sfdx-hydrate/0.1.0/package.tgz
+30 verbose request uri https://registry.npmjs.org/sfdx-hydrate
+31 verbose request sending authorization for write operation
+32 info attempt registry request try #1 at 9:54:21 PM
+33 verbose request using bearer token for auth
+34 verbose request id d30103f176f2e988
+35 http request PUT https://registry.npmjs.org/sfdx-hydrate
+36 http 403 https://registry.npmjs.org/sfdx-hydrate
+37 verbose headers { 'content-type': 'application/json',
+37 verbose headers   'cache-control': 'max-age=300',
+37 verbose headers   'content-length': '91',
+37 verbose headers   'accept-ranges': 'bytes',
+37 verbose headers   date: 'Thu, 30 Nov 2017 08:54:22 GMT',
+37 verbose headers   via: '1.1 varnish',
+37 verbose headers   connection: 'keep-alive',
+37 verbose headers   'x-served-by': 'cache-akl1420-AKL',
+37 verbose headers   'x-cache': 'MISS',
+37 verbose headers   'x-cache-hits': '0',
+37 verbose headers   'x-timer': 'S1512032062.704275,VS0,VE1065',
+37 verbose headers   vary: 'Accept-Encoding, Accept' }
+38 verbose request invalidating /Users/logan/.npm/registry.npmjs.org/sfdx-hydrate on PUT
+39 error publish Failed PUT 403
+40 verbose stack Error: You cannot publish over the previously published version 0.1.0. : sfdx-hydrate
+40 verbose stack     at makeError (/Users/logan/.asdf/installs/nodejs/6.11.4/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:302:12)
+40 verbose stack     at CachingRegistryClient.<anonymous> (/Users/logan/.asdf/installs/nodejs/6.11.4/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:290:14)
+40 verbose stack     at Request._callback (/Users/logan/.asdf/installs/nodejs/6.11.4/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:210:14)
+40 verbose stack     at Request.self.callback (/Users/logan/.asdf/installs/nodejs/6.11.4/lib/node_modules/npm/node_modules/request/request.js:187:22)
+40 verbose stack     at emitTwo (events.js:106:13)
+40 verbose stack     at Request.emit (events.js:191:7)
+40 verbose stack     at Request.<anonymous> (/Users/logan/.asdf/installs/nodejs/6.11.4/lib/node_modules/npm/node_modules/request/request.js:1048:10)
+40 verbose stack     at emitOne (events.js:96:13)
+40 verbose stack     at Request.emit (events.js:188:7)
+40 verbose stack     at IncomingMessage.<anonymous> (/Users/logan/.asdf/installs/nodejs/6.11.4/lib/node_modules/npm/node_modules/request/request.js:969:12)
+41 verbose statusCode 403
+42 verbose pkgid sfdx-hydrate
+43 verbose cwd /Users/logan/Projects/sfdx-hydrate
+44 error Darwin 17.2.0
+45 error argv "/Users/logan/.asdf/installs/nodejs/6.11.4/bin/node" "/Users/logan/.asdf/installs/nodejs/6.11.4/bin/npm" "publish"
+46 error node v6.11.4
+47 error npm  v3.10.10
+48 error code E403
+49 error You cannot publish over the previously published version 0.1.0. : sfdx-hydrate
+50 error If you need help, you may report this error at:
+50 error     <https://github.com/npm/npm/issues>
+51 verbose exit [ 1, true ]
