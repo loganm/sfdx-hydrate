@@ -25,7 +25,7 @@ This addition to the hydrate tool will generate that complete package.xml.
 Run the command:
 
 ```
-$ sfdx hydrate:scratchfile -u {username|alias} > package.xml
+$ sfdx hydrate:packagexml -u {username|alias} > package.xml
 ```
 
 This will produce an XML string, and pipe it directly into the file called package.xml.
