@@ -1,4 +1,5 @@
 const hydrateScratchfile = require('./commands/hydrateScratchfile.js');
+const hydratePackagexml = require('./commands/hydratePackagexml.js');
 
 (function () {
   'use strict';
@@ -9,6 +10,7 @@ const hydrateScratchfile = require('./commands/hydrateScratchfile.js');
   }];
 
   exports.commands = [
-    hydrateScratchfile
+    hydrateScratchfile,
+    hydratePackagexml
   ];
 }());

@@ -11,37 +11,24 @@ The only missing piece from the resulting scratch org is the features list. I'm 
 Run the command:
 
 ```
-$ sfdx hydrate:scratchfile -u <username|alias>`
+$ sfdx hydrate:scratchfile -u {username|alias} > project-scratch-def.json
 ```
 
-This will produce a JSON string in the command line that can be copied to a scratch org file.
+This will produce a scratch definition and pipe it into the project-scratch-def.json file.
 
-example output:
+## Creating a complete package.xml from a source org
+
+When migrating to an SFDX project, I find starting with a complete package.xml, and then trimming undesirable metadata elements until I have a working project is a good approach.
+
+This addition to the hydrate tool will generate that complete package.xml.
+
+Run the command:
 
 ```
-{
-  "orgName": "Wayne Enterprises",
-  "edition": "Enterprise",
-  "description": "Created by the sfdx-hydrate plugin",
-  "features": [],
-  "orgPreferences": {
-    "enabled": [
-      "IsCascadeActivateToRelatedPricesEnabled",
-      "IsQuantityScheduleEnabled",
-      "IsRevenueScheduleEnabled",
-      "IsQuoteEnabled",
-      ... 
-    ],
-    "disabled": [
-      "IsMiddleNameEnabled",
-      "IsNameSuffixEnabled",
-      "IsMarketingActionEnabled",
-      "IsNegativeQuantityEnabled",
-      ...
-    ]
-  }
-}
+$ sfdx hydrate:scratchfile -u {username|alias} > package.xml
 ```
+
+This will produce an XML string, and pipe it directly into the file called package.xml.
 
 ### Install as plugin
 
