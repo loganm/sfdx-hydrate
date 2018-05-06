@@ -30,6 +30,26 @@ $ sfdx hydrate:packagexml -u {username|alias} > package.xml
 
 This will produce an XML string, and pipe it directly into the file called package.xml.
 
+#### Optional Parameters
+|Parameter|Description|
+|---|---|
+|-a, --api|Set the API version of the packagexml file (Default is 42.0)|
+|-q, --quickfilter|Set of [predefined lists](./assets/quickFilters.json) to help only pull metadata types you really need|
+
+Using the Reporting quick filter will only output items from Reports, Dashboards, and Report Types. <br/>From assets/quickFilters.json:
+```javascript
+    "Reporting": ["Report",
+        "Dashboard",
+        "ReportType"
+    ]
+```
+
+```
+$ sfdx hydrate:packagexml -u {username|alias} -a 40.0 -q Reporting > package.xml
+```
+
+
+
 ### Install as plugin
 
 1. Install plugin: `sfdx plugins:install sfdx-hydrate`

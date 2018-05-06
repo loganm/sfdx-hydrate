@@ -1,5 +1,6 @@
 const forceUtils = require('../lib/forceUtils.js');
 const X2JS = require('x2js');
+const quickFilters = require('../assets/quickFilters.json');
 
 (function () {
   'use strict';
@@ -16,12 +17,27 @@ const X2JS = require('x2js');
         description: 'org that the package will be based on',
         hasValue: true,
         required: false
+      },
+      {
+        name: 'quickfilter',
+        char: 'q',
+        description: 'a predefined set of metadata types',
+        hasValue: true,
+        required: false
+      },
+      {
+        name: 'api',
+        char: 'a',
+        description: 'API Version',
+        hasValue: true,
+        required: false
       }
     ],
     run(context) {
 
       const username = context.flags.username;
-      const apiVersion = '42.0';
+      const apiVersion = context.flags.api || '42.0';
+      const quickFilter = context.flags.quickfilter;
 
       let packageTypes = {};
       
@@ -123,7 +139,9 @@ const X2JS = require('x2js');
           };
 
           Object.keys(packageTypes).forEach((type) => {
-            packageJson.types.push({ name: type, members: packageTypes[type] });
+            if(!quickFilter||quickFilters[quickFilter].includes(type)){
+              packageJson.types.push({ name: type, members: packageTypes[type] });
+            }
           });
 
           const packageXml = `<?xml version="1.0" encoding="UTF-8"?><Package xmlns="http://soap.sforce.com/2006/04/metadata">${new X2JS().js2xml(packageJson)}</Package>`;
