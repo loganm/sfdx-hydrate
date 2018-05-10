@@ -1,0 +1,22 @@
+{
+    "Reporting": ["Report",
+        "Dashboard",
+        "ReportType"
+    ],
+    "Automation": ["Flow",
+        "FlowDefinition",
+        "Workflow",
+        "ApexClass",
+        "ApexTrigger",
+        "ApexComponent",
+        "ApexPage"
+    ],
+    "Security": ["PermissionSet",
+        "Profile",
+        "ProfilePasswordPolicy",
+        "ProfileSessionSetting",
+        "RemoteSiteSetting",
+        "SharingRules",
+        "ConnectedApp"
+    ]
+}
