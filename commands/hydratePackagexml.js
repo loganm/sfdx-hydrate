@@ -64,14 +64,22 @@ const quickFilters = require('../assets/quickFilters.json');
         const folderedObjectsPromise = Promise.all([connPromise, foldersPromise]).then(([conn, folders]) => {
           const folderedObjectPromises = [];
           folders.forEach((folder) => {
-            folder.forEach((folderItem) => {
-              let objectType = folderItem.type.replace('Folder', '');
-              if (objectType === 'Email') {
-                objectType += 'Template';
-              }
-              const promise = conn.metadata.list({ type: objectType, folder: folderItem.fullName }, apiVersion);
-              folderedObjectPromises.push(promise);
-            });
+            let folderItems = [];
+            if (Array.isArray(folder)) {
+              folderItems = folder;
+            } else if (folder) {
+              folderItems = [folder];
+            }
+            if (folderItems.size > 0) {
+              folderItems.forEach((folderItem) => {
+                let objectType = folderItem.type.replace('Folder', '');
+                if (objectType === 'Email') {
+                  objectType += 'Template';
+                }
+                const promise = conn.metadata.list({ type: objectType, folder: folderItem.fullName }, apiVersion);
+                folderedObjectPromises.push(promise);
+              });
+            }
           });
           return Promise.all(folderedObjectPromises);
         });
@@ -88,28 +96,35 @@ const quickFilters = require('../assets/quickFilters.json');
         });
 
         Promise.all([unfolderedObjectsPromise, folderedObjectsPromise]).then(([unfolderedObjects, folderedObjects]) => {
-
           unfolderedObjects.forEach((unfolderedObject) => {
             try {
-              unfolderedObject.forEach((metadataEntries) => {
-                if (metadataEntries) {
-                  if (metadataEntries.type) {
-                    if (!packageTypes[metadataEntries.type]) {
-                      packageTypes[metadataEntries.type] = [];
-                    }
-                    packageTypes[metadataEntries.type].push(metadataEntries.fullName);
-                  } else {
-                    metadataEntries.forEach((metadataEntry) => {
-                      if (!packageTypes[metadataEntry.type]) {
-                        packageTypes[metadataEntry.type] = [];
-                      }
-                      packageTypes[metadataEntry.type].push(metadataEntry.fullName);
-                    });
-                  }
+              if (unfolderedObject) {
+                let unfolderedObjectItems = [];
+                if (Array.isArray(unfolderedObject)) {
+                  unfolderedObjectItems = unfolderedObject;
+                } else {
+                  unfolderedObjectItems = [unfolderedObject];
                 }
-              });
+                unfolderedObjectItems.forEach((metadataEntries) => {
+                  if (metadataEntries) {
+                    if (metadataEntries.type) {
+                      if (!packageTypes[metadataEntries.type]) {
+                        packageTypes[metadataEntries.type] = [];
+                      }
+                      packageTypes[metadataEntries.type].push(metadataEntries.fullName);
+                    } else {
+                      metadataEntries.forEach((metadataEntry) => {
+                        if (!packageTypes[metadataEntry.type]) {
+                          packageTypes[metadataEntry.type] = [];
+                        }
+                        packageTypes[metadataEntry.type].push(metadataEntry.fullName);
+                      });
+                    }
+                  }
+                });
+              }
             } catch (exception) {
-              // console.log(exception);
+              // console.log(unfolderedObject);
             }
           });
 
