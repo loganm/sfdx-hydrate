@@ -1,6 +1,7 @@
 const forceUtils = require('../lib/forceUtils.js');
 const X2JS = require('x2js');
-const quickFilters = require('../assets/quickFilters.json');
+const jf = require('jsonfile');
+const xf = require('xml-formatter');
 
 (function () {
   'use strict';
@@ -19,9 +20,9 @@ const quickFilters = require('../assets/quickFilters.json');
         required: false
       },
       {
-        name: 'quickfilter',
-        char: 'q',
-        description: 'a predefined set of metadata types',
+        name: 'config',
+        char: 'c',
+        description: 'path to config file',
         hasValue: true,
         required: false
       },
@@ -31,140 +32,186 @@ const quickFilters = require('../assets/quickFilters.json');
         description: 'API Version',
         hasValue: true,
         required: false
+      },
+      {
+        name: 'quickfilter',
+        char: 'q',
+        description: 'CSV separated list of metadata types to filter on',
+        hasValue: true,
+        required: false
+      },
+      {
+        name: 'formatxml',
+        char: 'f',
+        description: 'Format the xml output',
+        hasValue: false,
+        required: false
       }
     ],
     run(context) {
 
       const username = context.flags.username;
-      const apiVersion = context.flags.api || '42.0';
-      const quickFilter = context.flags.quickfilter;
-
-      let packageTypes = {};
+      const configFile = context.flags.config || false;
+      let apiVersion;
+      let quickFilters;
+      let formatxml;
       
-      forceUtils.getOrg(username, (org) => {
-
-        const connPromise = org.force._getConnection(org, org.config);
-
-        const describePromise = connPromise.then((conn) => {
-          return conn.metadata.describe(apiVersion);
-        });
-
-        const foldersPromise = Promise.all([connPromise, describePromise]).then(([conn, describe]) => {
-          const folderPromises = [];
-          describe.metadataObjects.forEach((object) => {
-            if (object.inFolder) {
-              const objectType = object.xmlName.replace('Template', '');
-              const promise = conn.metadata.list({ type: `${objectType}Folder`, folder: null }, apiVersion);
-              folderPromises.push(promise);
+      const packageTypes = {};
+      
+      try {
+        if (configFile) {
+          jf.readFile(configFile, (err, obj) => {
+            if (err) {
+              throw err;
+            } else {
+              /* cli parameters still override whats in the config file */
+              apiVersion = context.flags.api || obj.apiVersion || '42.0';
+              if (context.flags.quickfilter) {
+                quickFilters = context.flags.quickfilter.split(',');
+              } else {
+                quickFilters = obj.quickfilter || [];
+              }
+              formatxml = context.flags.formatxml || (obj.formatxml === 'true') || false;
             }
           });
-          return Promise.all(folderPromises);
-        });
+        } else {
+          apiVersion = context.flags.api || '42.0';
+          if (context.flags.quickfilter) {
+            quickFilters = context.flags.quickfilter.split(',');
+          } else {
+            quickFilters = [];
+          }
+          formatxml = context.flags.formatxml || false;
+        }
 
-        const folderedObjectsPromise = Promise.all([connPromise, foldersPromise]).then(([conn, folders]) => {
-          const folderedObjectPromises = [];
-          folders.forEach((folder) => {
-            let folderItems = [];
-            if (Array.isArray(folder)) {
-              folderItems = folder;
-            } else if (folder) {
-              folderItems = [folder];
-            }
-            if (folderItems.size > 0) {
-              folderItems.forEach((folderItem) => {
-                let objectType = folderItem.type.replace('Folder', '');
-                if (objectType === 'Email') {
-                  objectType += 'Template';
-                }
-                const promise = conn.metadata.list({ type: objectType, folder: folderItem.fullName }, apiVersion);
-                folderedObjectPromises.push(promise);
-              });
-            }
+        forceUtils.getOrg(username, (org) => {
+          const connPromise = org.force._getConnection(org, org.config);
+
+          const describePromise = connPromise.then(conn => conn.metadata.describe(apiVersion));
+
+          const foldersPromise = Promise.all([connPromise, describePromise]).then(([conn, describe]) => {
+            const folderPromises = [];
+            describe.metadataObjects.forEach((object) => {
+              if (object.inFolder) {
+                const objectType = object.xmlName.replace('Template', '');
+                const promise = conn.metadata.list({ type: `${objectType}Folder`, folder: null }, apiVersion);
+                folderPromises.push(promise);
+              }
+            });
+            return Promise.all(folderPromises);
           });
-          return Promise.all(folderedObjectPromises);
-        });
 
-        const unfolderedObjectsPromise = Promise.all([connPromise, describePromise]).then(([conn, describe]) => {
-          const unfolderedObjectPromises = [];
-          describe.metadataObjects.forEach((object) => {
-            if (!object.inFolder && object.xmlName !== 'StandardValueSetTranslation') {
-              const promise = conn.metadata.list({ type: object.xmlName, folder: null }, apiVersion);
-              unfolderedObjectPromises.push(promise);
-            }
-          });
-          return Promise.all(unfolderedObjectPromises);
-        });
-
-        Promise.all([unfolderedObjectsPromise, folderedObjectsPromise]).then(([unfolderedObjects, folderedObjects]) => {
-          unfolderedObjects.forEach((unfolderedObject) => {
-            try {
-              if (unfolderedObject) {
-                let unfolderedObjectItems = [];
-                if (Array.isArray(unfolderedObject)) {
-                  unfolderedObjectItems = unfolderedObject;
-                } else {
-                  unfolderedObjectItems = [unfolderedObject];
-                }
-                unfolderedObjectItems.forEach((metadataEntries) => {
-                  if (metadataEntries) {
-                    if (metadataEntries.type) {
-                      if (!packageTypes[metadataEntries.type]) {
-                        packageTypes[metadataEntries.type] = [];
-                      }
-                      packageTypes[metadataEntries.type].push(metadataEntries.fullName);
-                    } else {
-                      metadataEntries.forEach((metadataEntry) => {
-                        if (!packageTypes[metadataEntry.type]) {
-                          packageTypes[metadataEntry.type] = [];
-                        }
-                        packageTypes[metadataEntry.type].push(metadataEntry.fullName);
-                      });
-                    }
+          const folderedObjectsPromise = Promise.all([connPromise, foldersPromise]).then(([conn, folders]) => {
+            const folderedObjectPromises = [];
+            folders.forEach((folder) => {
+              let folderItems = [];
+              if (Array.isArray(folder)) {
+                folderItems = folder;
+              } else if (folder) {
+                folderItems = [folder];
+              }
+              if (folderItems.length > 0) {
+                folderItems.forEach((folderItem) => {
+                  let objectType = folderItem.type.replace('Folder', '');
+                  if (objectType === 'Email') {
+                    objectType += 'Template';
                   }
+                  const promise = conn.metadata.list({ type: objectType, folder: folderItem.fullName }, apiVersion);
+                  folderedObjectPromises.push(promise);
                 });
               }
-            } catch (exception) {
-              // console.log(unfolderedObject);
-            }
+            });
+            return Promise.all(folderedObjectPromises);
           });
 
-          folderedObjects.forEach((folderedObject) => {
-            try {
-              folderedObject.forEach((metadataEntries) => {
-                if (metadataEntries.type) {
-                  if (!packageTypes[metadataEntries.type]) {
-                    packageTypes[metadataEntries.type] = [];
+          const unfolderedObjectsPromise = Promise.all([connPromise, describePromise]).then(([conn, describe]) => {
+            const unfolderedObjectPromises = [];
+            describe.metadataObjects.forEach((object) => {
+              if (!object.inFolder && object.xmlName !== 'StandardValueSetTranslation') {
+                const promise = conn.metadata.list({ type: object.xmlName, folder: null }, apiVersion);
+                unfolderedObjectPromises.push(promise);
+              }
+            });
+            return Promise.all(unfolderedObjectPromises);
+          });
+
+          Promise.all([unfolderedObjectsPromise, folderedObjectsPromise]).then(([unfolderedObjects, folderedObjects]) => {
+            unfolderedObjects.forEach((unfolderedObject) => {
+              try {
+                if (unfolderedObject) {
+                  let unfolderedObjectItems = [];
+                  if (Array.isArray(unfolderedObject)) {
+                    unfolderedObjectItems = unfolderedObject;
+                  } else {
+                    unfolderedObjectItems = [unfolderedObject];
                   }
-                  packageTypes[metadataEntries.type].push(metadataEntries.fullName);
-                } else {
-                  metadataEntries.forEach((metadataEntry) => {
-                    if (!packageTypes[metadataEntry.type]) {
-                      packageTypes[metadataEntry.type] = [];
+                  unfolderedObjectItems.forEach((metadataEntries) => {
+                    if (metadataEntries) {
+                      if (metadataEntries.type) {
+                        if (!packageTypes[metadataEntries.type]) {
+                          packageTypes[metadataEntries.type] = [];
+                        }
+                        packageTypes[metadataEntries.type].push(metadataEntries.fullName);
+                      } else {
+                        metadataEntries.forEach((metadataEntry) => {
+                          if (!packageTypes[metadataEntry.type]) {
+                            packageTypes[metadataEntry.type] = [];
+                          }
+                          packageTypes[metadataEntry.type].push(metadataEntry.fullName);
+                        });
+                      }
                     }
-                    packageTypes[metadataEntry.type].push(metadataEntry.fullName);
                   });
                 }
-              });
-            } catch (exception) {}
-          });
-          
-          const packageJson = {
-            types: [],
-            version: apiVersion
-          };
+              } catch (exception) {
+                // console.log(unfolderedObject);
+              }
+            });
+            
+            folderedObjects.forEach((folderedObject) => {
+              try {
+                folderedObject.forEach((metadataEntries) => {
+                  if (metadataEntries.type) {
+                    if (!packageTypes[metadataEntries.type]) {
+                      packageTypes[metadataEntries.type] = [];
+                    }
+                    packageTypes[metadataEntries.type].push(metadataEntries.fullName);
+                  } else {
+                    [metadataEntries].forEach((metadataEntry) => {
+                      if (!packageTypes[metadataEntry.type]) {
+                        packageTypes[metadataEntry.type] = [];
+                      }
+                      packageTypes[metadataEntry.type].push(metadataEntry.fullName);
+                    });
+                  }
+                });
+              } catch (exception) { 
+                // console.log(folderedObject);
+              }
+            });
+            
+            const packageJson = {
+              types: [],
+              version: apiVersion
+            };
 
-          Object.keys(packageTypes).forEach((type) => {
-            if(!quickFilter||quickFilters[quickFilter].includes(type)){
-              packageJson.types.push({ name: type, members: packageTypes[type] });
+            Object.keys(packageTypes).forEach((type) => {
+              if ((quickFilters.length===0 || quickFilters.includes(type))) {
+                packageJson.types.push({ name: type, members: packageTypes[type] });
+              }
+            });
+
+            const packageXml = `<?xml version="1.0" encoding="UTF-8"?><Package xmlns="http://soap.sforce.com/2006/04/metadata">${new X2JS().js2xml(packageJson)}</Package>`;
+
+            if (formatxml) {
+              console.log(xf(packageXml));
+            } else {
+              console.log(packageXml);
             }
           });
-
-          const packageXml = `<?xml version="1.0" encoding="UTF-8"?><Package xmlns="http://soap.sforce.com/2006/04/metadata">${new X2JS().js2xml(packageJson)}</Package>`;
-
-          console.log(packageXml);
+        
         });
-
-      });
+      } catch (err) { console.error(err); }
     }
   };
 }());

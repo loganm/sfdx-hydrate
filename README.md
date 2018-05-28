@@ -34,21 +34,34 @@ This will produce an XML string, and pipe it directly into the file called packa
 |Parameter|Description|
 |---|---|
 |-a, --api|Set the API version of the packagexml file (Default is 42.0)|
-|-q, --quickfilter|Set of [predefined lists](./assets/quickFilters.json) to help only pull metadata types you really need|
+|-c, --config|Configuration file to help make pulling metadata more scriptable|
+|-f, --formatxml| Formats the xml output in an easier to read format
+|-q, --quickfilter| CSV list of metadata types to filter
 
-Using the Reporting quick filter will only output items from Reports, Dashboards, and Report Types. <br/>From assets/quickFilters.json:
+Non-config file example
+```
+$ sfdx hydrate:packagexml -u {username|alias} -f -a 40.0 -q Report,Dashboard > package.xml
+```
+
+An example config file is defined below. The "quickfilter" array lets you specify a list of metadata types that will be included in the output. You can have the xml output formatted by setting the "formatxml" to true.
+
+Note: commandline parameters will **_override_** what is in the config file
 ```javascript
-    "Reporting": ["Report",
-        "Dashboard",
-        "ReportType"
-    ]
+    //config.json
+    {
+        "quickfilter": ["Report",
+            "Dashboard",
+            "ReportType"
+        ],
+        "formatxml":"true",
+        "apiVersion":"40.0"
+    }
+
 ```
 
 ```
-$ sfdx hydrate:packagexml -u {username|alias} -a 40.0 -q Reporting > package.xml
+$ sfdx hydrate:packagexml -u {username|alias} -c ./config.json > package.xml
 ```
-
-
 
 ### Install as plugin
 
