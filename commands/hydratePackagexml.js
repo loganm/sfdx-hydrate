@@ -5,13 +5,14 @@ const xf = require('xml-formatter');
 
 (function () {
   'use strict';
-
+  
   module.exports = {
     topic: 'hydrate',
     command: 'packagexml',
     description: 'Generate a complete package xml form the specified org',
-    help: 'help text for hydrate:packagexml',
-    flags: [{
+    help: 'help text for hydrate:packageJson:create',
+    flags: [
+      {
         name: 'username',
         char: 'u',
         description: 'org that the package will be based on',
@@ -45,13 +46,6 @@ const xf = require('xml-formatter');
         description: 'Format the xml output',
         hasValue: false,
         required: false
-      },
-      {
-        name: 'excludeManaged',
-        char: 'x',
-        description: 'Exclude Managed Packages from output',
-        hasValue: false,
-        required: false
       }
     ],
     run(context) {
@@ -61,9 +55,9 @@ const xf = require('xml-formatter');
       let apiVersion;
       let quickFilters;
       let formatxml;
-      let excludeManaged;
+      
       const packageTypes = {};
-
+      
       try {
         if (configFile) {
           jf.readFile(configFile, (err, obj) => {
@@ -71,25 +65,23 @@ const xf = require('xml-formatter');
               throw err;
             } else {
               /* cli parameters still override whats in the config file */
-              apiVersion = context.flags.api || obj.apiVersion || '43.0';
+              apiVersion = context.flags.api || obj.apiVersion || '42.0';
               if (context.flags.quickfilter) {
                 quickFilters = context.flags.quickfilter.split(',');
               } else {
                 quickFilters = obj.quickfilter || [];
               }
               formatxml = context.flags.formatxml || (obj.formatxml === 'true') || false;
-              excludeManaged = context.flags.excludeManaged || (obj.excludeManaged === 'true') || false;
             }
           });
         } else {
-          apiVersion = context.flags.api || '43.0';
+          apiVersion = context.flags.api || '42.0';
           if (context.flags.quickfilter) {
             quickFilters = context.flags.quickfilter.split(',');
           } else {
             quickFilters = [];
           }
           formatxml = context.flags.formatxml || false;
-          excludeManaged = context.flags.excludeManaged || false;
         }
 
         forceUtils.getOrg(username, (org) => {
@@ -102,9 +94,7 @@ const xf = require('xml-formatter');
             describe.metadataObjects.forEach((object) => {
               if (object.inFolder) {
                 const objectType = object.xmlName.replace('Template', '');
-                const promise = conn.metadata.list({
-                  type: `${objectType}Folder`
-                }, apiVersion);
+                const promise = conn.metadata.list({ type: `${objectType}Folder`, folder: null }, apiVersion);
                 folderPromises.push(promise);
               }
             });
@@ -126,10 +116,7 @@ const xf = require('xml-formatter');
                   if (objectType === 'Email') {
                     objectType += 'Template';
                   }
-                  const promise = conn.metadata.list({
-                    type: objectType,
-                    folder: folderItem.fullName
-                  }, apiVersion);
+                  const promise = conn.metadata.list({ type: objectType, folder: folderItem.fullName }, apiVersion);
                   folderedObjectPromises.push(promise);
                 });
               }
@@ -140,33 +127,15 @@ const xf = require('xml-formatter');
           const unfolderedObjectsPromise = Promise.all([connPromise, describePromise]).then(([conn, describe]) => {
             const unfolderedObjectPromises = [];
             describe.metadataObjects.forEach((object) => {
-              if (!object.inFolder) {
-                const promise = conn.metadata.list({
-                  type: object.xmlName
-                }, apiVersion);
+              if (!object.inFolder && object.xmlName !== 'StandardValueSetTranslation') {
+                const promise = conn.metadata.list({ type: object.xmlName, folder: null }, apiVersion);
                 unfolderedObjectPromises.push(promise);
               }
             });
             return Promise.all(unfolderedObjectPromises);
           });
 
-          const queryPromise = connPromise.then(conn => conn.tooling.query('SELECT DeveloperName,ActiveVersion.VersionNumber FROM FlowDefinition'));
-
-          const FlowActiveVersionPromise = Promise.all([queryPromise]).then(([query]) => {
-            const FlowDescriptionPromises = {};
-            query.records.forEach((records) => {
-              if (records.ActiveVersion) {
-                if (!FlowDescriptionPromises[records.DeveloperName]) {
-                  FlowDescriptionPromises[records.DeveloperName] = [];
-                }
-                FlowDescriptionPromises[records.DeveloperName].push(records.ActiveVersion.VersionNumber);
-              }
-            });
-            return FlowDescriptionPromises;
-          });
-
-          Promise.all([unfolderedObjectsPromise, folderedObjectsPromise, FlowActiveVersionPromise]).then(([unfolderedObjects, folderedObjects, activeFlowVersions]) => {
-            // console.error(activeFlowVersions);
+          Promise.all([unfolderedObjectsPromise, folderedObjectsPromise]).then(([unfolderedObjects, folderedObjects]) => {
             unfolderedObjects.forEach((unfolderedObject) => {
               try {
                 if (unfolderedObject) {
@@ -177,73 +146,47 @@ const xf = require('xml-formatter');
                     unfolderedObjectItems = [unfolderedObject];
                   }
                   unfolderedObjectItems.forEach((metadataEntries) => {
-
                     if (metadataEntries) {
-
-                      if ((metadataEntries.type && metadataEntries.manageableState !== 'installed') || (metadataEntries.type && metadataEntries.manageableState === 'installed' && !excludeManaged)) {
-
-                        if (metadataEntries.fileName.includes('ValueSetTranslation')) {
-                          const x = metadataEntries.fileName.split('.')[1].substring(0, 1).toUpperCase() + metadataEntries.fileName.split('.')[1].substring(1);
-                          if (!packageTypes[x]) {
-                            packageTypes[x] = [];
-                          }
-                          packageTypes[x].push(metadataEntries.fullName);
-                        } else {
-
-                          if (!packageTypes[metadataEntries.type]) {
-                            packageTypes[metadataEntries.type] = [];
-                          }
-
-                          if (metadataEntries.type === 'Flow') {
-
-                            if (activeFlowVersions[metadataEntries.fullName]) {
-                              packageTypes[metadataEntries.type].push(`${metadataEntries.fullName}-${activeFlowVersions[metadataEntries.fullName]}`);
-                            } else {
-                              packageTypes[metadataEntries.type].push(metadataEntries.fullName);
-                            }
-
-                          } else {
-                            packageTypes[metadataEntries.type].push(metadataEntries.fullName);
-                          }
-
-                        }
-                      }
-                    } else {
-                      console.error('No metadataEntry available');
-                    }
-                  });
-                }
-              } catch (err) {
-                console.error(err);
-              }
-            });
-
-            folderedObjects.forEach((folderedObject) => {
-              try {
-
-                if (folderedObject) {
-                  let folderedObjectItems = [];
-                  if (Array.isArray(folderedObject)) {
-                    folderedObjectItems = folderedObject;
-                  } else {
-                    folderedObjectItems = [folderedObject];
-                  }
-                  folderedObjectItems.forEach((metadataEntries) => {
-                    if (metadataEntries) {
-                      if ((metadataEntries.type && metadataEntries.manageableState !== 'installed') || (metadataEntries.type && metadataEntries.manageableState === 'installed' && !excludeManaged)) {
-
+                      if (metadataEntries.type) {
                         if (!packageTypes[metadataEntries.type]) {
                           packageTypes[metadataEntries.type] = [];
                         }
                         packageTypes[metadataEntries.type].push(metadataEntries.fullName);
+                      } else {
+                        metadataEntries.forEach((metadataEntry) => {
+                          if (!packageTypes[metadataEntry.type]) {
+                            packageTypes[metadataEntry.type] = [];
+                          }
+                          packageTypes[metadataEntry.type].push(metadataEntry.fullName);
+                        });
                       }
-                    } else {
-                      console.error('No metadataEntry available');
                     }
                   });
                 }
-              } catch (err) {
-                console.error(err);
+              } catch (exception) {
+                // console.log(unfolderedObject);
+              }
+            });
+            
+            folderedObjects.forEach((folderedObject) => {
+              try {
+                folderedObject.forEach((metadataEntries) => {
+                  if (metadataEntries.type) {
+                    if (!packageTypes[metadataEntries.type]) {
+                      packageTypes[metadataEntries.type] = [];
+                    }
+                    packageTypes[metadataEntries.type].push(metadataEntries.fullName);
+                  } else {
+                    [metadataEntries].forEach((metadataEntry) => {
+                      if (!packageTypes[metadataEntry.type]) {
+                        packageTypes[metadataEntry.type] = [];
+                      }
+                      packageTypes[metadataEntry.type].push(metadataEntry.fullName);
+                    });
+                  }
+                });
+              } catch (exception) { 
+                // console.log(folderedObject);
               }
             });
 
@@ -260,11 +203,8 @@ const xf = require('xml-formatter');
             };
 
             Object.keys(packageTypes).forEach((type) => {
-              if ((quickFilters.length === 0 || quickFilters.includes(type))) {
-                packageJson.types.push({
-                  name: type,
-                  members: packageTypes[type]
-                });
+              if ((quickFilters.length===0 || quickFilters.includes(type))) {
+                packageJson.types.push({ name: type, members: packageTypes[type] });
               }
             });
 
@@ -276,11 +216,9 @@ const xf = require('xml-formatter');
               console.log(packageXml);
             }
           });
-
+        
         });
-      } catch (err) {
-        console.error(err);
-      }
+      } catch (err) { console.error(err); }
     }
   };
 }());
