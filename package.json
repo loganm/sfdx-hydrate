@@ -1,6 +1,6 @@
 {
   "name": "sfdx-hydrate",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Tools to help migrate existing Salesforce orgs to SFDX projects.",
   "main": "index.js",
   "author": "Logan Moore",
@@ -20,17 +20,17 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "jsforce": "^1.7.1",
+    "jsforce": "1.9.0",
     "jsonfile": "^4.0.0",
-    "npm": "^6.0.1",
-    "salesforce-alm": "^40.0.6",
+    "npm": "6.2.0",
+    "salesforce-alm": "^43.8.0",
     "sfdx-js": "^4.0.5",
-    "x2js": "^3.1.1",
+    "x2js": "3.2.1",
     "xml-formatter": "~1.0.1"
   },
   "devDependencies": {
     "eslint": "^3.17.1",
     "eslint-config-airbnb-base": "^11.1.1",
-    "eslint-plugin-import": "^2.2.0"
+    "eslint-plugin-import": "2.13.0"
   }
 }
