@@ -195,7 +195,7 @@ Array.prototype.pushUniqueValue = function (element) {
                 // console.log(folderedObject);
               }
             });
-            
+
             const packageJson = {
               types: [],
               version: apiVersion
