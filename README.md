@@ -33,15 +33,14 @@ This will produce an XML string, and pipe it directly into the file called packa
 #### Optional Parameters
 |Parameter|Description|
 |---|---|
-|-a, --api|Set the API version of the packagexml file (Default is 43.0)|
+|-a, --api|Set the API version of the packagexml file (Default is 42.0)|
 |-c, --config|Configuration file to help make pulling metadata more scriptable|
-|-x, --excludeManaged|Exclude Managed Packages from output|
 |-f, --formatxml| Formats the xml output in an easier to read format
 |-q, --quickfilter| CSV list of metadata types to filter
 
 Non-config file example
 ```
-$ sfdx hydrate:packagexml -u {username|alias} -f -a 43.0 -q Report,Dashboard > package.xml
+$ sfdx hydrate:packagexml -u {username|alias} -f -a 40.0 -q Report,Dashboard > package.xml
 ```
 
 An example config file is defined below. The "quickfilter" array lets you specify a list of metadata types that will be included in the output. You can have the xml output formatted by setting the "formatxml" to true.
@@ -55,7 +54,7 @@ Note: commandline parameters will **_override_** what is in the config file
             "ReportType"
         ],
         "formatxml":"true",
-        "apiVersion":"43.0"
+        "apiVersion":"40.0"
     }
 
 ```
