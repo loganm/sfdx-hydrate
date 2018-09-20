@@ -3,6 +3,12 @@ const X2JS = require('x2js');
 const jf = require('jsonfile');
 const xf = require('xml-formatter');
 
+Array.prototype.pushUniqueValue = function (element) {
+  if (!this.includes(element)) {
+    this.push(element);
+  }
+};
+
 (function () {
   'use strict';
   
@@ -151,13 +157,13 @@ const xf = require('xml-formatter');
                         if (!packageTypes[metadataEntries.type]) {
                           packageTypes[metadataEntries.type] = [];
                         }
-                        packageTypes[metadataEntries.type].push(metadataEntries.fullName);
+                        packageTypes[metadataEntries.type].pushUniqueValue(metadataEntries.fullName);
                       } else {
                         metadataEntries.forEach((metadataEntry) => {
                           if (!packageTypes[metadataEntry.type]) {
                             packageTypes[metadataEntry.type] = [];
                           }
-                          packageTypes[metadataEntry.type].push(metadataEntry.fullName);
+                          packageTypes[metadataEntry.type].pushUniqueValue(metadataEntry.fullName);
                         });
                       }
                     }
@@ -175,26 +181,19 @@ const xf = require('xml-formatter');
                     if (!packageTypes[metadataEntries.type]) {
                       packageTypes[metadataEntries.type] = [];
                     }
-                    packageTypes[metadataEntries.type].push(metadataEntries.fullName);
+                    packageTypes[metadataEntries.type].pushUniqueValue(metadataEntries.fullName);
                   } else {
                     [metadataEntries].forEach((metadataEntry) => {
                       if (!packageTypes[metadataEntry.type]) {
                         packageTypes[metadataEntry.type] = [];
                       }
-                      packageTypes[metadataEntry.type].push(metadataEntry.fullName);
+                      packageTypes[metadataEntry.type].pushUniqueValue(metadataEntry.fullName);
                     });
                   }
                 });
               } catch (exception) { 
                 // console.log(folderedObject);
               }
-            });
-
-            if (!packageTypes['StandardValueSet']) {
-              packageTypes['StandardValueSet'] = [];
-            }
-            ['AccountContactMultiRoles', 'AccountContactRole', 'AccountOwnership', 'AccountRating', 'AccountType', 'AddressCountryCode', 'AddressStateCode', 'AssetStatus', 'CampaignMemberStatus', 'CampaignStatus', 'CampaignType', 'CaseContactRole', 'CaseOrigin', 'CasePriority', 'CaseReason', 'CaseStatus', 'CaseType', 'ContactRole', 'ContractContactRole', 'ContractStatus', 'EntitlementType', 'EventSubject', 'EventType', 'FiscalYearPeriodName', 'FiscalYearPeriodPrefix', 'FiscalYearQuarterName', 'FiscalYearQuarterPrefix', 'IdeaCategory', 'IdeaMultiCategory', 'IdeaStatus', 'IdeaThemeStatus', 'Industry', 'InvoiceStatus', 'LeadSource', 'LeadStatus', 'OpportunityCompetitor', 'OpportunityStage', 'OpportunityType', 'OrderStatus', 'OrderType', 'PartnerRole', 'Product2Family', 'QuestionOrigin', 'QuickTextCategory', 'QuickTextChannel', 'QuoteStatus', 'SalesTeamRole', 'Salutation', 'ServiceContractApprovalStatus', 'SocialPostClassification', 'SocialPostEngagementLevel', 'SocialPostReviewedStatus', 'SolutionStatus', 'TaskPriority', 'TaskStatus', 'TaskSubject', 'TaskType', 'WorkOrderLineItemStatus', 'WorkOrderPriority', 'WorkOrderStatus'].forEach((member) => {
-              packageTypes['StandardValueSet'].push(member);
             });
 
             const packageJson = {
